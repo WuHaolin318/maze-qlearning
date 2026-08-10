@@ -61,7 +61,7 @@ python experiments.py
 - 展示：迷宫、智能体路径、策略箭头、Q 值热度、训练曲线，以及最近一次 Q 更新的数值。
 
 网页里的算法逻辑和 Python 版保持一致，适合边看边理解 Q 更新公式。
-启用 GitHub Pages 后，公开链接为：`https://WuHaolin318.github.io/maze-learnin/`
+启用 GitHub Pages 后，公开链接为：`https://WuHaolin318.github.io/maze-qlearning/`
 
 ## 核心概念讲解
 
