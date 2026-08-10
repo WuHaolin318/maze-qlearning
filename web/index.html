@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Q-learning 迷宫学习台</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Q-learning 迷宫学习台</h1>
+    <div class="stats">
+      <span>局数 <b id="statEpisode">0</b></span>
+      <span>探索率 ε <b id="statEpsilon">1.000</b></span>
+      <span>近100局成功率 <b id="statSuccess">-</b></span>
+      <span>平均步数 <b id="statSteps">-</b></span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage" aria-label="迷宫训练区">
+      <canvas id="maze" width="480" height="480" aria-label="迷宫与智能体位置">迷宫与智能体位置</canvas>
+      <div class="controls">
+        <button type="button" id="playBtn" class="btn btn-primary" aria-label="播放或暂停训练">
+          <span aria-hidden="true" id="playIcon">▶</span><span id="playLabel">播放</span>
+        </button>
+        <button type="button" id="stepBtn" class="btn" aria-label="单步执行一次动作">
+          <span aria-hidden="true">↷</span>单步
+        </button>
+        <button type="button" id="resetBtn" class="btn" aria-label="重置训练">
+          <span aria-hidden="true">↺</span>重置
+        </button>
+        <label class="param">速度 <input type="range" id="speed" min="1" max="24" value="8"><span id="speedVal">8</span></label>
+        <label class="check"><input type="checkbox" id="showPolicy" checked>策略箭头</label>
+        <label class="check"><input type="checkbox" id="showQ">Q 值热度</label>
+      </div>
+
+      <h2 class="section-title">参数</h2>
+      <div class="controls params">
+        <label class="param">学习率 α <input type="range" id="alpha" min="0.01" max="1" step="0.01" value="0.1"><span id="alphaVal">0.10</span></label>
+        <label class="param">折扣 γ <input type="range" id="gamma" min="0" max="0.99" step="0.01" value="0.9"><span id="gammaVal">0.90</span></label>
+        <label class="param">初始探索率 <input type="range" id="epsilonStart" min="0.05" max="1" step="0.05" value="1"><span id="epsilonStartVal">1.00</span></label>
+        <label class="param">每局衰减 <input type="range" id="epsilonDecay" min="0.9" max="1" step="0.001" value="0.999"><span id="epsilonDecayVal">0.999</span></label>
+      </div>
+    </section>
+
+    <aside class="side" aria-label="学习曲线与更新信息">
+      <h2 class="section-title">训练曲线</h2>
+      <canvas id="curves" width="480" height="240" aria-label="奖励与成功率训练曲线">奖励与成功率训练曲线</canvas>
+      <h2 class="section-title">最近一次 Q 更新</h2>
+      <div class="formula-box">
+        <div id="lastLine">状态 -- · 动作 -- · 奖励 -- · 结束 --</div>
+        <div id="formulaLine">Q(s,a) ← --</div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
