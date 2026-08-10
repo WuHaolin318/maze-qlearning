@@ -19,10 +19,9 @@ maze-qlearning/
 ├── experiments.py  # 实验：alpha / 训练轮数 / epsilon 三组对比
 ├── tests.py        # 自动化测试：环境规则、更新公式、可复现性
 ├── requirements.txt
-├── web/            # 网页可视化：浏览器直接打开 web/index.html
-│   ├── index.html
-│   ├── style.css
-│   └── app.js
+├── index.html      # 网页可视化入口（浏览器直接打开）
+├── style.css       # 网页样式
+├── app.js          # 网页逻辑：环境、Q-learning、绘制
 ├── README.md
 └── results/        # 训练曲线、Q 表、策略图、路径图、实验图
 ```
@@ -57,11 +56,12 @@ python experiments.py
 
 项目自带一个交互式网页学习台，无需安装依赖或启动服务器：
 
-- 位置：`web/index.html`，用浏览器直接打开；
+- 位置：`index.html`，用浏览器直接打开；
 - 功能：播放/暂停/单步/重置训练，实时调节学习率 α、折扣因子 γ、初始探索率与每局衰减；
 - 展示：迷宫、智能体路径、策略箭头、Q 值热度、训练曲线，以及最近一次 Q 更新的数值。
 
 网页里的算法逻辑和 Python 版保持一致，适合边看边理解 Q 更新公式。
+启用 GitHub Pages 后，公开链接为：`https://WuHaolin318.github.io/maze-learnin/`
 
 ## 核心概念讲解
 
