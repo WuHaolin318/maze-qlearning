@@ -69,6 +69,21 @@ h1 {
   font-weight: 600;
 }
 
+.back-link {
+  align-self: center;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
