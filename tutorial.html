@@ -18,7 +18,7 @@
       <a href="https://github.com/WuHaolin318/maze-qlearning">GitHub</a>
     </nav>
     <div class="progress-wrap" aria-label="教程进度">
-      <span id="progressText">1 / 22</span>
+      <span id="progressText">1 / 25</span>
       <div class="progress-track"><div id="progressFill"></div></div>
     </div>
   </header>
@@ -80,7 +80,84 @@ pip install numpy matplotlib</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-3" data-title="env.py：__init__ 初始化">
+      <section class="step" id="step-3" data-title="env.py：设计迷宫地图">
+        <div class="step-head">
+          <span class="step-num">03</span>
+          <div><p class="kicker">STEP 03</p><h2>env.py：设计迷宫地图 MAP</h2></div>
+          <span class="step-type">参数</span>
+        </div>
+        <div class="step-body">
+          <h3>这个参数做什么</h3>
+          <p>MAP 是整个迷宫的地图：一张 6 行 6 列的二维数组，数字编码决定每个格子是空地、墙、起点还是终点。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="12" readonly spellcheck="false"># 0 = 空地，1 = 墙，2 = 起点，3 = 终点
+MAP = [
+    [2, 0, 1, 0, 0, 0],
+    [0, 0, 1, 0, 1, 0],
+    [0, 0, 0, 0, 1, 0],
+    [1, 0, 0, 0, 0, 0],
+    [1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 3],
+]</textarea></div>
+          <h3>逐项讲解</h3>
+          <ul class="line-expl">
+            <li><code>[2, 0, 1, ...]</code> 第 0 行：起点在 (0,0)，(0,2) 是墙</li>
+            <li><code>2</code> 起点只能有一个，智能体每次从它出发</li>
+            <li><code>3</code> 终点只能有一个，到达即成功</li>
+            <li><code>1</code> 墙不能进入，撞墙会原地停留并扣分</li>
+            <li><code>0</code> 空地，智能体可以走</li>
+          </ul>
+          <h3>怎么设计自己的地图</h3>
+          <ul class="line-expl">
+            <li>先决定大小：本项目是 6×6，也可以改成 5×5 或 8×8</li>
+            <li>把起点放在左上角、终点放在右下角，中间放几堵墙制造通道</li>
+            <li>设计完必须保证从起点到终点有一条通路，否则永远学不会</li>
+            <li>墙越多、通道越绕，迷宫越难，学习速度越慢</li>
+          </ul>
+          <h3>动手练习</h3>
+          <p>试着把 <code>MAP[2][4]</code> 的墙改成 <code>0</code>，或去掉 (3,0) 的墙，看看路径会不会变短、学习会不会变快。</p>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
+
+      <section class="step" id="step-4" data-title="env.py：动作与奖励参数">
+        <div class="step-head">
+          <span class="step-num">04</span>
+          <div><p class="kicker">STEP 04</p><h2>env.py：动作与奖励参数</h2></div>
+          <span class="step-type">参数</span>
+        </div>
+        <div class="step-body">
+          <h3>动作参数 ACTIONS</h3>
+          <p>动作不是直接写“上/下/左/右”，而是用数字编号，再映射成坐标位移。这样 Q 表可以直接用数字当列下标。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="3" readonly spellcheck="false"># 动作编号：0=上 1=下 2=左 3=右
+ACTIONS = {0: (-1, 0), 1: (1, 0), 2: (0, -1), 3: (0, 1)}</textarea></div>
+          <ul class="line-expl">
+            <li><code>0: (-1, 0)</code> 向上：行号减 1，列不变</li>
+            <li><code>1: (1, 0)</code> 向下：行号加 1</li>
+            <li><code>2: (0, -1)</code> 向左：列号减 1</li>
+            <li><code>3: (0, 1)</code> 向右：列号加 1</li>
+            <li>用数字代替文字，是因为 Q 表的列号就是动作编号，方便直接查表</li>
+          </ul>
+          <h3>奖励参数 REWARD</h3>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="3" readonly spellcheck="false">REWARD_GOAL = 10.0   # 到达终点：大正奖励
+REWARD_WALL = -1.0   # 撞墙 / 越界：惩罚
+REWARD_STEP = -0.1   # 普通移动：小惩罚</textarea></div>
+          <ul class="line-expl">
+            <li><code>+10</code> 明确告诉智能体“到这里是对的”，数值要大</li>
+            <li><code>-1</code> 惩罚无效动作，但不要太大，否则它会害怕移动</li>
+            <li><code>-0.1</code> 每走一步都扣一点，引导它找更短的路径</li>
+            <li>奖励差就是 Q 学习的“学习信号”，设计不合理，训练就学不会</li>
+          </ul>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
+
+      <section class="step" id="step-5" data-title="env.py：__init__ 初始化">
         <div class="step-head">
           <span class="step-num">03</span>
           <div><p class="kicker">STEP 03</p><h2>env.py：__init__ 初始化环境</h2></div>
@@ -115,7 +192,7 @@ pip install numpy matplotlib</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-4" data-title="env.py：_find_position">
+      <section class="step" id="step-6" data-title="env.py：_find_position">
         <div class="step-head">
           <span class="step-num">04</span>
           <div><p class="kicker">STEP 04</p><h2>env.py：_find_position 找坐标</h2></div>
@@ -144,7 +221,7 @@ pip install numpy matplotlib</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-5" data-title="env.py：reset">
+      <section class="step" id="step-7" data-title="env.py：reset">
         <div class="step-head">
           <span class="step-num">05</span>
           <div><p class="kicker">STEP 05</p><h2>env.py：reset 开始新一局</h2></div>
@@ -169,7 +246,7 @@ pip install numpy matplotlib</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-6" data-title="env.py：_is_wall">
+      <section class="step" id="step-8" data-title="env.py：_is_wall">
         <div class="step-head">
           <span class="step-num">06</span>
           <div><p class="kicker">STEP 06</p><h2>env.py：_is_wall 判断墙和边界</h2></div>
@@ -198,7 +275,7 @@ pip install numpy matplotlib</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-7" data-title="env.py：step 执行动作">
+      <section class="step" id="step-9" data-title="env.py：step 执行动作">
         <div class="step-head">
           <span class="step-num">07</span>
           <div><p class="kicker">STEP 07</p><h2>env.py：step 执行一个动作</h2></div>
@@ -236,7 +313,7 @@ pip install numpy matplotlib</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-8" data-title="env.py：render 打印地图">
+      <section class="step" id="step-10" data-title="env.py：render 打印地图">
         <div class="step-head">
           <span class="step-num">08</span>
           <div><p class="kicker">STEP 08</p><h2>env.py：render 在终端画地图</h2></div>
@@ -273,7 +350,7 @@ pip install numpy matplotlib</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-9" data-title="运行第一个环境测试">
+      <section class="step" id="step-11" data-title="运行第一个环境测试">
         <div class="step-head">
           <span class="step-num">09</span>
           <div><p class="kicker">STEP 09</p><h2>运行第一个环境测试</h2></div>
@@ -306,10 +383,10 @@ print(env.step(3))</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-10" data-title="agent.py：__init__ Q 表">
+      <section class="step" id="step-12" data-title="agent.py：__init__ Q 表">
         <div class="step-head">
-          <span class="step-num">10</span>
-          <div><p class="kicker">STEP 10</p><h2>agent.py：__init__ 创建 Q 表</h2></div>
+          <span class="step-num">12</span>
+          <div><p class="kicker">STEP 12</p><h2>agent.py：__init__ 创建 Q 表</h2></div>
           <span class="step-type">函数</span>
         </div>
         <div class="step-body">
@@ -347,10 +424,10 @@ print(env.step(3))</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-11" data-title="agent.py：state_to_index">
+      <section class="step" id="step-13" data-title="agent.py：state_to_index">
         <div class="step-head">
-          <span class="step-num">11</span>
-          <div><p class="kicker">STEP 11</p><h2>agent.py：state_to_index 坐标转下标</h2></div>
+          <span class="step-num">13</span>
+          <div><p class="kicker">STEP 13</p><h2>agent.py：state_to_index 坐标转下标</h2></div>
           <span class="step-type">函数</span>
         </div>
         <div class="step-body">
@@ -372,10 +449,10 @@ print(env.step(3))</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-12" data-title="agent.py：choose_action">
+      <section class="step" id="step-14" data-title="agent.py：choose_action">
         <div class="step-head">
-          <span class="step-num">12</span>
-          <div><p class="kicker">STEP 12</p><h2>agent.py：choose_action 选动作</h2></div>
+          <span class="step-num">14</span>
+          <div><p class="kicker">STEP 14</p><h2>agent.py：choose_action 选动作</h2></div>
           <span class="step-type">函数</span>
         </div>
         <div class="step-body">
@@ -401,10 +478,10 @@ print(env.step(3))</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-13" data-title="agent.py：update 更新公式">
+      <section class="step" id="step-15" data-title="agent.py：update 更新公式">
         <div class="step-head">
-          <span class="step-num">13</span>
-          <div><p class="kicker">STEP 13</p><h2>agent.py：update 更新 Q 值</h2></div>
+          <span class="step-num">15</span>
+          <div><p class="kicker">STEP 15</p><h2>agent.py：update 更新 Q 值</h2></div>
           <span class="step-type">函数</span>
         </div>
         <div class="step-body">
@@ -441,10 +518,10 @@ target = 1 + 0.9 × 0 = 1
         </div>
       </section>
 
-      <section class="step" id="step-14" data-title="agent.py：decay_epsilon">
+      <section class="step" id="step-16" data-title="agent.py：decay_epsilon">
         <div class="step-head">
-          <span class="step-num">14</span>
-          <div><p class="kicker">STEP 14</p><h2>agent.py：decay_epsilon 探索衰减</h2></div>
+          <span class="step-num">16</span>
+          <div><p class="kicker">STEP 16</p><h2>agent.py：decay_epsilon 探索衰减</h2></div>
           <span class="step-type">函数</span>
         </div>
         <div class="step-body">
@@ -466,10 +543,34 @@ target = 1 + 0.9 × 0 = 1
         </div>
       </section>
 
-      <section class="step" id="step-15" data-title="train.py：训练循环">
+      <section class="step" id="step-17" data-title="train.py：训练参数">
         <div class="step-head">
-          <span class="step-num">15</span>
-          <div><p class="kicker">STEP 15</p><h2>train.py：训练循环</h2></div>
+          <span class="step-num">17</span>
+          <div><p class="kicker">STEP 17</p><h2>train.py：训练参数</h2></div>
+          <span class="step-type">参数</span>
+        </div>
+        <div class="step-body">
+          <h3>先看这三个参数</h3>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="4" readonly spellcheck="false">N_EPISODES = 3000   # 训练多少局
+MAX_STEPS = 150     # 每局最多走多少步
+SEED = 42           # 随机种子，保证可复现</textarea></div>
+          <ul class="line-expl">
+            <li><code>N_EPISODES = 3000</code> 训练局数：太少学不完，太多浪费时间</li>
+            <li><code>MAX_STEPS = 150</code> 一局上限：防止智能体在原地绕圈绕到天荒地老</li>
+            <li><code>SEED = 42</code> 固定随机种子：每次训练结果一样，方便对照实验</li>
+            <li>这三个参数影响训练时间和稳定性，是“实验变量”之外的固定配置</li>
+          </ul>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
+
+      <section class="step" id="step-18" data-title="train.py：训练循环">
+        <div class="step-head">
+          <span class="step-num">18</span>
+          <div><p class="kicker">STEP 18</p><h2>train.py：训练循环</h2></div>
           <span class="step-type">函数</span>
         </div>
         <div class="step-body">
@@ -508,10 +609,10 @@ target = 1 + 0.9 × 0 = 1
         </div>
       </section>
 
-      <section class="step" id="step-16" data-title="运行训练看曲线">
+      <section class="step" id="step-19" data-title="运行训练看曲线">
         <div class="step-head">
-          <span class="step-num">16</span>
-          <div><p class="kicker">STEP 16</p><h2>运行训练，观察学习曲线</h2></div>
+          <span class="step-num">19</span>
+          <div><p class="kicker">STEP 19</p><h2>运行训练，观察学习曲线</h2></div>
           <span class="step-type">运行</span>
         </div>
         <div class="step-body">
@@ -535,10 +636,10 @@ episode 1000 | 最近100局成功率 100% | 平均步数 15.6 | epsilon 0.368
         </div>
       </section>
 
-      <section class="step" id="step-17" data-title="evaluate.py：run_policy">
+      <section class="step" id="step-20" data-title="evaluate.py：run_policy">
         <div class="step-head">
-          <span class="step-num">17</span>
-          <div><p class="kicker">STEP 17</p><h2>evaluate.py：run_policy 跑一局</h2></div>
+          <span class="step-num">20</span>
+          <div><p class="kicker">STEP 20</p><h2>evaluate.py：run_policy 跑一局</h2></div>
           <span class="step-type">函数</span>
         </div>
         <div class="step-body">
@@ -567,10 +668,10 @@ episode 1000 | 最近100局成功率 100% | 平均步数 15.6 | epsilon 0.368
         </div>
       </section>
 
-      <section class="step" id="step-18" data-title="evaluate.py：统计成功率">
+      <section class="step" id="step-21" data-title="evaluate.py：统计成功率">
         <div class="step-head">
-          <span class="step-num">18</span>
-          <div><p class="kicker">STEP 18</p><h2>evaluate.py：统计成功率</h2></div>
+          <span class="step-num">21</span>
+          <div><p class="kicker">STEP 21</p><h2>evaluate.py：统计成功率</h2></div>
           <span class="step-type">函数</span>
         </div>
         <div class="step-body">
@@ -600,10 +701,10 @@ print("平均步数", sum(steps_all) / len(steps_all))</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-19" data-title="visualize.py：best_action_grid">
+      <section class="step" id="step-22" data-title="visualize.py：best_action_grid">
         <div class="step-head">
-          <span class="step-num">19</span>
-          <div><p class="kicker">STEP 19</p><h2>visualize.py：best_action_grid 策略网格</h2></div>
+          <span class="step-num">22</span>
+          <div><p class="kicker">STEP 22</p><h2>visualize.py：best_action_grid 策略网格</h2></div>
           <span class="step-type">函数</span>
         </div>
         <div class="step-body">
@@ -634,10 +735,10 @@ print("平均步数", sum(steps_all) / len(steps_all))</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-20" data-title="visualize.py：走一次路径">
+      <section class="step" id="step-23" data-title="visualize.py：走一次路径">
         <div class="step-head">
-          <span class="step-num">20</span>
-          <div><p class="kicker">STEP 20</p><h2>visualize.py：走一次路径</h2></div>
+          <span class="step-num">23</span>
+          <div><p class="kicker">STEP 23</p><h2>visualize.py：走一次路径</h2></div>
           <span class="step-type">函数</span>
         </div>
         <div class="step-body">
@@ -670,10 +771,10 @@ print("平均步数", sum(steps_all) / len(steps_all))</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-21" data-title="experiments.py：参数实验">
+      <section class="step" id="step-24" data-title="experiments.py：参数实验">
         <div class="step-head">
-          <span class="step-num">21</span>
-          <div><p class="kicker">STEP 21</p><h2>experiments.py：单变量实验</h2></div>
+          <span class="step-num">24</span>
+          <div><p class="kicker">STEP 24</p><h2>experiments.py：单变量实验</h2></div>
           <span class="step-type">实验</span>
         </div>
         <div class="step-body">
@@ -703,10 +804,10 @@ alpha = 0.3  | 最终成功率 100.0% | 平均步数 10.0</code></pre>
         </div>
       </section>
 
-      <section class="step" id="step-22" data-title="总结与下一步">
+      <section class="step" id="step-25" data-title="总结与下一步">
         <div class="step-head">
-          <span class="step-num">22</span>
-          <div><p class="kicker">STEP 22</p><h2>总结与下一步</h2></div>
+          <span class="step-num">25</span>
+          <div><p class="kicker">STEP 25</p><h2>总结与下一步</h2></div>
           <span class="step-type">收尾</span>
         </div>
         <div class="step-body">

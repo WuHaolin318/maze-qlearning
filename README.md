@@ -20,7 +20,7 @@ maze-qlearning/
 ├── tests.py        # 自动化测试：环境规则、更新公式、可复现性
 ├── requirements.txt
 ├── index.html      # 项目介绍页（首页，科技风格）
-├── tutorial.html   # 12 步学习教程页
+├── tutorial.html   # 25 步函数与参数教程页
 ├── tutorial.css    # 教程页样式
 ├── tutorial.js     # 教程页导航与进度
 ├── demo.html       # 交互式 Q-learning 学习台
@@ -63,7 +63,7 @@ python experiments.py
 项目自带三个网页，无需安装依赖或启动服务器：
 
 - 首页介绍：`index.html`，项目介绍与成果展示；
-- 学习教程：`tutorial.html`，22 个函数级步骤从零写代码，支持进度记录；
+- 学习教程：`tutorial.html`，25 个函数与参数步骤从零写代码，支持进度记录；
 - 交互学习台：`demo.html`，实时观察智能体学习；
 - 功能：播放/暂停/单步/重置训练，实时调节学习率 α、折扣因子 γ、初始探索率与每局衰减；
 - 展示：迷宫、智能体路径、策略箭头、Q 值热度、训练曲线，以及最近一次 Q 更新的数值。
