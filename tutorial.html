@@ -18,7 +18,7 @@
       <a href="https://github.com/WuHaolin318/maze-qlearning">GitHub</a>
     </nav>
     <div class="progress-wrap" aria-label="教程进度">
-      <span id="progressText">1 / 12</span>
+      <span id="progressText">1 / 22</span>
       <div class="progress-track"><div id="progressFill"></div></div>
     </div>
   </header>
@@ -45,8 +45,8 @@
           </ul>
           <h3>讲解</h3>
           <p>强化学习里，智能体不是在“背答案”，而是反复和环境交互：看到状态、做动作、拿奖励、再看到新状态。这样一轮一轮试错后，它才知道“什么位置该往哪走”。</p>
-          <p>本项目最终会写出这些文件：<code>env.py</code>（环境）、<code>agent.py</code>（智能体）、<code>train.py</code>（训练）、<code>evaluate.py</code>（评估）、<code>visualize.py</code>（可视化）、<code>experiments.py</code>（实验）。</p>
-          <p>在开始写代码前，可以先去 <a href="demo.html">学习台</a> 看一次智能体从乱走到学会的过程，这样后面每一步代码都有画面感。</p>
+          <p>本项目会逐步写出这些文件：<code>env.py</code>（环境）、<code>agent.py</code>（智能体）、<code>train.py</code>（训练）、<code>evaluate.py</code>（评估）、<code>visualize.py</code>（可视化）、<code>experiments.py</code>（实验）。</p>
+          <p>接下来每个函数单独一课：先看代码，再逐行讲解。开始前可以先打开 <a href="demo.html">学习台</a> 看一次完整训练过程。</p>
         </div>
         <div class="step-nav">
           <button type="button" class="prev-btn" disabled>上一步</button>
@@ -80,39 +80,34 @@ pip install numpy matplotlib</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-3" data-title="env.py：地图与奖励">
+      <section class="step" id="step-3" data-title="env.py：__init__ 初始化">
         <div class="step-head">
           <span class="step-num">03</span>
-          <div><p class="kicker">STEP 03</p><h2>env.py：地图与奖励</h2></div>
-          <span class="step-type">代码</span>
+          <div><p class="kicker">STEP 03</p><h2>env.py：__init__ 初始化环境</h2></div>
+          <span class="step-type">函数</span>
         </div>
         <div class="step-body">
-          <h3>学习目标</h3>
-          <ul>
-            <li>用二维数组表示迷宫地图</li>
-            <li>用常量定义动作和奖励</li>
-            <li>理解“小步惩罚引导短路径”的设计</li>
+          <h3>这个函数做什么</h3>
+          <p>创建环境对象时自动运行，负责记住地图尺寸、起点、终点，并立刻开始第一局。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="12" readonly spellcheck="false">class GridMazeEnv:
+    def __init__(self):
+        self.rows = len(MAP)
+        self.cols = len(MAP[0])
+        self.start_pos = self._find_position(2)
+        self.goal_pos = self._find_position(3)
+        self.agent_pos = None
+        self.reset()</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>class GridMazeEnv:</code> 定义一个环境类，把地图和规则打包在一起</li>
+            <li><code>def __init__(self):</code> 每次创建环境对象时自动调用</li>
+            <li><code>self.rows = len(MAP)</code> 地图有几行，也就是 6</li>
+            <li><code>self.cols = len(MAP[0])</code> 第一行有几个格子，也就是列数 6</li>
+            <li><code>self.start_pos = self._find_position(2)</code> 扫描地图找到编码 2 的起点</li>
+            <li><code>self.goal_pos = self._find_position(3)</code> 扫描地图找到编码 3 的终点</li>
+            <li><code>self.agent_pos = None</code> 智能体位置先留空</li>
+            <li><code>self.reset()</code> 调用下面的 reset，立刻把智能体放回起点</li>
           </ul>
-          <h3>新建 env.py，写入地图和奖励</h3>
-          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="18" readonly spellcheck="false"># env.py —— 迷宫环境：地图与奖励规则
-
-# 0 = 空地，1 = 墙，2 = 起点，3 = 终点
-MAP = [
-    [2, 0, 1, 0, 0, 0],
-    [0, 0, 1, 0, 1, 0],
-    [0, 0, 0, 0, 1, 0],
-    [1, 0, 0, 0, 0, 0],
-    [1, 1, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 3],
-]
-
-# 动作编号：0=上 1=下 2=左 3=右
-ACTIONS = {0: (-1, 0), 1: (1, 0), 2: (0, -1), 3: (0, 1)}
-
-REWARD_GOAL = 10.0   # 到达终点：大正奖励
-REWARD_WALL = -1.0   # 撞墙 / 越界：惩罚
-REWARD_STEP = -0.1   # 普通移动：小惩罚，引导走短路</textarea></div>
-          <p>每个格子都用数字编码：数字越小越省内存，也更容易判断“是不是墙”。</p>
         </div>
         <div class="step-nav">
           <button type="button" class="prev-btn">上一步</button>
@@ -120,44 +115,99 @@ REWARD_STEP = -0.1   # 普通移动：小惩罚，引导走短路</textarea></di
         </div>
       </section>
 
-      <section class="step" id="step-4" data-title="env.py：状态与动作">
+      <section class="step" id="step-4" data-title="env.py：_find_position">
         <div class="step-head">
           <span class="step-num">04</span>
-          <div><p class="kicker">STEP 04</p><h2>env.py：状态与动作</h2></div>
-          <span class="step-type">代码</span>
+          <div><p class="kicker">STEP 04</p><h2>env.py：_find_position 找坐标</h2></div>
+          <span class="step-type">函数</span>
         </div>
         <div class="step-body">
-          <h3>学习目标</h3>
-          <ul>
-            <li>实现 reset、step、render 三个核心方法</li>
-            <li>理解撞墙时“位置不变、只扣分”</li>
-          </ul>
-          <h3>继续在 env.py 里写环境类</h3>
-          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="32" readonly spellcheck="false">class GridMazeEnv:
-    def __init__(self):
-        self.rows = len(MAP)
-        self.cols = len(MAP[0])
-        self.start_pos = self._find_position(2)
-        self.goal_pos = self._find_position(3)
-        self.agent_pos = None
-        self.reset()
-
-    def _find_position(self, value):
+          <h3>这个函数做什么</h3>
+          <p>输入一个数字编码，遍历地图，返回第一个匹配格子的坐标 (row, col)。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="7" readonly spellcheck="false">    def _find_position(self, value):
         for r in range(self.rows):
             for c in range(self.cols):
                 if MAP[r][c] == value:
-                    return (r, c)
+                    return (r, c)</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>for r in range(self.rows):</code> 从上到下逐行扫描</li>
+            <li><code>for c in range(self.cols):</code> 在每一行里从左到右扫描</li>
+            <li><code>if MAP[r][c] == value:</code> 当前格子的编码等于要找的值</li>
+            <li><code>return (r, c)</code> 找到后立刻返回坐标，函数结束</li>
+          </ul>
+          <p>因为地图里起点和终点都只有一个，所以“找到就返回”是安全的。</p>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
 
-    def reset(self):
+      <section class="step" id="step-5" data-title="env.py：reset">
+        <div class="step-head">
+          <span class="step-num">05</span>
+          <div><p class="kicker">STEP 05</p><h2>env.py：reset 开始新一局</h2></div>
+          <span class="step-type">函数</span>
+        </div>
+        <div class="step-body">
+          <h3>这个函数做什么</h3>
+          <p>把智能体放回起点，并返回初始状态，表示“新的一局开始”。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="3" readonly spellcheck="false">    def reset(self):
         self.agent_pos = self.start_pos
-        return self.agent_pos
+        return self.agent_pos</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>self.agent_pos = self.start_pos</code> 位置重置为起点</li>
+            <li><code>return self.agent_pos</code> 把初始状态交回给调用方</li>
+          </ul>
+          <p>训练时每一局开始都会调用它，相当于“把棋子放回棋盘”。</p>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
 
-    def _is_wall(self, r, c):
-        if r < 0 or r >= self.rows or c < 0 or c >= self.cols:
+      <section class="step" id="step-6" data-title="env.py：_is_wall">
+        <div class="step-head">
+          <span class="step-num">06</span>
+          <div><p class="kicker">STEP 06</p><h2>env.py：_is_wall 判断墙和边界</h2></div>
+          <span class="step-type">函数</span>
+        </div>
+        <div class="step-body">
+          <h3>这个函数做什么</h3>
+          <p>给一个坐标，回答“这里能不能进去”。越界也算墙，不允许走出地图。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="7" readonly spellcheck="false">    def _is_wall(self, r, c):
+        if r < 0 or r >= self.rows:
             return True
-        return MAP[r][c] == 1
+        if c < 0 or c >= self.cols:
+            return True
+        return MAP[r][c] == 1</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>if r &lt; 0 or r &gt;= self.rows:</code> 行号越出上下边界</li>
+            <li><code>return True</code> 越界就当成墙，禁止进入</li>
+            <li><code>if c &lt; 0 or c &gt;= self.cols:</code> 列号越出左右边界</li>
+            <li><code>return MAP[r][c] == 1</code> 没越界时，检查是不是墙格子</li>
+          </ul>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
 
-    def step(self, action):
+      <section class="step" id="step-7" data-title="env.py：step 执行动作">
+        <div class="step-head">
+          <span class="step-num">07</span>
+          <div><p class="kicker">STEP 07</p><h2>env.py：step 执行一个动作</h2></div>
+          <span class="step-type">函数</span>
+        </div>
+        <div class="step-body">
+          <h3>这个函数做什么</h3>
+          <p>输入动作编号（0 上、1 下、2 左、3 右），移动智能体，并返回 <code>(新状态, 奖励, 是否结束)</code>。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="14" readonly spellcheck="false">    def step(self, action):
         dr, dc = ACTIONS[action]
         r, c = self.agent_pos
         nr, nc = r + dr, c + dc
@@ -166,9 +216,36 @@ REWARD_STEP = -0.1   # 普通移动：小惩罚，引导走短路</textarea></di
         self.agent_pos = (nr, nc)
         if self.agent_pos == self.goal_pos:
             return self.agent_pos, REWARD_GOAL, True
-        return self.agent_pos, REWARD_STEP, False
+        return self.agent_pos, REWARD_STEP, False</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>dr, dc = ACTIONS[action]</code> 取出该动作对应的行、列位移</li>
+            <li><code>r, c = self.agent_pos</code> 读出当前位置</li>
+            <li><code>nr, nc = r + dr, c + dc</code> 计算动作后的目标位置</li>
+            <li><code>if self._is_wall(nr, nc):</code> 目标位置是墙或越界</li>
+            <li><code>return self.agent_pos, REWARD_WALL, False</code> 位置不变、给惩罚、本局不结束</li>
+            <li><code>self.agent_pos = (nr, nc)</code> 正常移动，更新位置</li>
+            <li><code>if self.agent_pos == self.goal_pos:</code> 到达终点</li>
+            <li><code>return ..., REWARD_GOAL, True</code> 给 +10，本局结束</li>
+            <li><code>return ..., REWARD_STEP, False</code> 普通移动，小惩罚，继续</li>
+          </ul>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
 
-    def render(self):
+      <section class="step" id="step-8" data-title="env.py：render 打印地图">
+        <div class="step-head">
+          <span class="step-num">08</span>
+          <div><p class="kicker">STEP 08</p><h2>env.py：render 在终端画地图</h2></div>
+          <span class="step-type">函数</span>
+        </div>
+        <div class="step-body">
+          <h3>这个函数做什么</h3>
+          <p>把当前迷宫打印成字符画：A 是智能体，G 是终点，# 是墙，. 是空地。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="14" readonly spellcheck="false">    def render(self):
         for r in range(self.rows):
             line = ""
             for c in range(self.cols):
@@ -181,7 +258,14 @@ REWARD_STEP = -0.1   # 普通移动：小惩罚，引导走短路</textarea></di
                 else:
                     line += ". "
             print(line)</textarea></div>
-          <p><code>step</code> 每次只做一件事：根据动作算出新位置，然后返回“新状态 + 奖励 + 是否结束”。</p>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>line = ""</code> 每一行先准备一个空字符串</li>
+            <li><code>if (r, c) == self.agent_pos:</code> 这个格子是智能体当前位置</li>
+            <li><code>line += "A "</code> 拼上字母 A，表示智能体</li>
+            <li><code>elif MAP[r][c] == 1:</code> 否则判断是不是墙</li>
+            <li><code>print(line)</code> 一行拼完就打印</li>
+          </ul>
         </div>
         <div class="step-nav">
           <button type="button" class="prev-btn">上一步</button>
@@ -189,23 +273,49 @@ REWARD_STEP = -0.1   # 普通移动：小惩罚，引导走短路</textarea></di
         </div>
       </section>
 
-      <section class="step" id="step-5" data-title="agent.py：Q 表与探索">
+      <section class="step" id="step-9" data-title="运行第一个环境测试">
         <div class="step-head">
-          <span class="step-num">05</span>
-          <div><p class="kicker">STEP 05</p><h2>agent.py：Q 表与探索</h2></div>
-          <span class="step-type">代码</span>
+          <span class="step-num">09</span>
+          <div><p class="kicker">STEP 09</p><h2>运行第一个环境测试</h2></div>
+          <span class="step-type">运行</span>
         </div>
         <div class="step-body">
           <h3>学习目标</h3>
           <ul>
-            <li>用 numpy 二维数组创建 Q 表</li>
-            <li>实现 epsilon-greedy 动作选择</li>
+            <li>亲手调用一次环境的方法</li>
+            <li>看懂返回的“状态、奖励、是否结束”</li>
           </ul>
-          <h3>新建 agent.py，写智能体的“记忆”</h3>
-          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="28" readonly spellcheck="false">import random
-import numpy as np
+          <h3>在终端输入</h3>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block terminal" rows="6" readonly spellcheck="false">python
+from env import GridMazeEnv
+env = GridMazeEnv()
+print(env.start_pos, env.goal_pos)
+print(env.step(1))
+print(env.step(3))
+print(env.step(3))</textarea></div>
+          <h3>预期输出</h3>
+          <pre class="expected"><code>(0, 0) (5, 5)
+((1, 0), -0.1, False)
+((1, 1), -0.1, False)
+((1, 1), -1.0, False)</code></pre>
+          <p>最后一步从 (1,1) 向右走，目标是 (1,2)，那里是墙，所以位置没变、奖励 -1。</p>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
 
-class QLearningAgent:
+      <section class="step" id="step-10" data-title="agent.py：__init__ Q 表">
+        <div class="step-head">
+          <span class="step-num">10</span>
+          <div><p class="kicker">STEP 10</p><h2>agent.py：__init__ 创建 Q 表</h2></div>
+          <span class="step-type">函数</span>
+        </div>
+        <div class="step-body">
+          <h3>这个函数做什么</h3>
+          <p>创建智能体，准备一张全 0 的 Q 表，并保存所有超参数。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="22" readonly spellcheck="false">class QLearningAgent:
     def __init__(self, n_rows, n_cols, n_actions=4,
                  alpha=0.1, gamma=0.9,
                  epsilon=1.0, epsilon_min=0.05,
@@ -219,21 +329,17 @@ class QLearningAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.random = random.Random(seed)
-        # Q 表：每一行是一个状态，每一列是一个动作
-        self.q_table = np.zeros((n_rows * n_cols, n_actions))
-
-    def state_to_index(self, state):
-        row, col = state
-        return row * self.n_cols + col
-
-    def choose_action(self, state, greedy=False):
-        index = self.state_to_index(state)
-        # 探索：以 epsilon 概率随机选动作
-        if not greedy and self.random.random() < self.epsilon:
-            return self.random.randint(0, self.n_actions - 1)
-        # 利用：选择 Q 值最大的动作
-        return int(np.argmax(self.q_table[index]))</textarea></div>
-          <p>训练初期 epsilon=1.0，几乎全在探索；随着训练推进 epsilon 会不断变小。</p>
+        self.q_table = np.zeros((n_rows * n_cols, n_actions))</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>alpha</code> 学习率：每次更新时新信息占多大比重</li>
+            <li><code>gamma</code> 折扣因子：未来奖励打多少折</li>
+            <li><code>epsilon</code> 当前探索概率：越大越爱随机走</li>
+            <li><code>epsilon_min</code> 探索概率下限，防止完全停止探索</li>
+            <li><code>epsilon_decay</code> 每局结束后 epsilon 乘的衰减系数</li>
+            <li><code>random.Random(seed)</code> 独立随机源，固定 seed 可复现</li>
+            <li><code>np.zeros((n_rows * n_cols, n_actions))</code> 36 行 4 列的全零表</li>
+          </ul>
         </div>
         <div class="step-nav">
           <button type="button" class="prev-btn">上一步</button>
@@ -241,38 +347,93 @@ class QLearningAgent:
         </div>
       </section>
 
-      <section class="step" id="step-6" data-title="agent.py：Q 更新公式">
+      <section class="step" id="step-11" data-title="agent.py：state_to_index">
         <div class="step-head">
-          <span class="step-num">06</span>
-          <div><p class="kicker">STEP 06</p><h2>agent.py：Q 更新公式</h2></div>
-          <span class="step-type">代码</span>
+          <span class="step-num">11</span>
+          <div><p class="kicker">STEP 11</p><h2>agent.py：state_to_index 坐标转下标</h2></div>
+          <span class="step-type">函数</span>
         </div>
         <div class="step-body">
-          <h3>学习目标</h3>
-          <ul>
-            <li>看懂并写对 Q 更新公式</li>
-            <li>理解 TD target 为什么更接近真实回报</li>
+          <h3>这个函数做什么</h3>
+          <p>把二维坐标 (row, col) 转成一维下标，因为 Q 表只有一维的行索引。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="4" readonly spellcheck="false">    def state_to_index(self, state):
+        row, col = state
+        return row * self.n_cols + col</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>row, col = state</code> 把坐标拆成行和列</li>
+            <li><code>row * self.n_cols + col</code> 第 row 行前面有 row 整行，再加上第 col 列</li>
           </ul>
-          <h3>在 agent.py 中继续写 update 和衰减</h3>
-          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="20" readonly spellcheck="false">    def update(self, state, action, reward, next_state, done):
+          <p>例如 (1, 2) 会变成 <code>1 × 6 + 2 = 8</code>，正好是 Q 表的第 8 行。</p>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
+
+      <section class="step" id="step-12" data-title="agent.py：choose_action">
+        <div class="step-head">
+          <span class="step-num">12</span>
+          <div><p class="kicker">STEP 12</p><h2>agent.py：choose_action 选动作</h2></div>
+          <span class="step-type">函数</span>
+        </div>
+        <div class="step-body">
+          <h3>这个函数做什么</h3>
+          <p>用 epsilon-greedy 策略选动作：有时随机探索，有时选 Q 值最大的动作。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="9" readonly spellcheck="false">    def choose_action(self, state, greedy=False):
+        index = self.state_to_index(state)
+        if not greedy and self.random.random() < self.epsilon:
+            return self.random.randint(0, self.n_actions - 1)
+        return int(np.argmax(self.q_table[index]))</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>greedy=False</code> 训练时允许探索；评估时传 True 只利用</li>
+            <li><code>random() &lt; epsilon</code> 以 epsilon 概率进入探索分支</li>
+            <li><code>randint(0, 3)</code> 随机返回一个动作编号</li>
+            <li><code>np.argmax(q_table[index])</code> 找出 Q 值最大的动作下标</li>
+          </ul>
+          <p>探索帮它发现新路径，利用帮它走当前最优路径，epsilon 决定两者的比例。</p>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
+
+      <section class="step" id="step-13" data-title="agent.py：update 更新公式">
+        <div class="step-head">
+          <span class="step-num">13</span>
+          <div><p class="kicker">STEP 13</p><h2>agent.py：update 更新 Q 值</h2></div>
+          <span class="step-type">函数</span>
+        </div>
+        <div class="step-body">
+          <h3>这个函数做什么</h3>
+          <p>用一次经验 <code>(state, action, reward, next_state, done)</code> 更新 Q 表中的一个值。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="13" readonly spellcheck="false">    def update(self, state, action, reward, next_state, done):
         s_idx = self.state_to_index(state)
         ns_idx = self.state_to_index(next_state)
-
         if done:
             best_next_q = 0.0
         else:
             best_next_q = float(np.max(self.q_table[ns_idx]))
-
-        # 目标值 = 本次奖励 + 未来最优回报的折扣估计
         td_target = reward + self.gamma * best_next_q
         old_q = self.q_table[s_idx, action]
-        # 旧 Q 朝目标值方向移动一小步
-        self.q_table[s_idx, action] = old_q + self.alpha * (td_target - old_q)
-
-    def decay_epsilon(self):
-        self.epsilon = max(self.epsilon_min,
-                           self.epsilon * self.epsilon_decay)</textarea></div>
-          <p>公式是 <code>Q(s,a) ← Q(s,a) + α × (r + γ × maxQ(s′,a′) − Q(s,a))</code>。括号里的差就是“当前估计错得有多远”。</p>
+        self.q_table[s_idx, action] = old_q + self.alpha * (td_target - old_q)</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>s_idx</code> 当前状态在 Q 表里的行</li>
+            <li><code>ns_idx</code> 下一个状态在 Q 表里的行</li>
+            <li><code>if done:</code> 本局结束，没有下一个状态，未来回报按 0 算</li>
+            <li><code>np.max(q_table[ns_idx])</code> 下一个状态里最好的动作值多少</li>
+            <li><code>td_target = reward + gamma * best_next_q</code> 目标值，比旧估计更接近真相</li>
+            <li><code>old_q + alpha * (td_target - old_q)</code> 往目标值方向走一小步</li>
+          </ul>
+          <h3>手算例子</h3>
+          <pre class="expected"><code>Q 初始 = 0，奖励 = 1，下一个状态不是终点
+alpha = 0.5，gamma = 0.9
+target = 1 + 0.9 × 0 = 1
+新 Q = 0 + 0.5 × (1 - 0) = 0.5</code></pre>
         </div>
         <div class="step-nav">
           <button type="button" class="prev-btn">上一步</button>
@@ -280,44 +441,24 @@ class QLearningAgent:
         </div>
       </section>
 
-      <section class="step" id="step-7" data-title="train.py：训练循环">
+      <section class="step" id="step-14" data-title="agent.py：decay_epsilon">
         <div class="step-head">
-          <span class="step-num">07</span>
-          <div><p class="kicker">STEP 07</p><h2>train.py：训练循环</h2></div>
-          <span class="step-type">代码</span>
+          <span class="step-num">14</span>
+          <div><p class="kicker">STEP 14</p><h2>agent.py：decay_epsilon 探索衰减</h2></div>
+          <span class="step-type">函数</span>
         </div>
         <div class="step-body">
-          <h3>学习目标</h3>
-          <ul>
-            <li>把环境和智能体串成“选动作 → 反馈 → 更新”循环</li>
-            <li>理解 episode 结束后的 epsilon 衰减</li>
+          <h3>这个函数做什么</h3>
+          <p>每局结束后让 epsilon 变小一点，但不会低于 epsilon_min。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="3" readonly spellcheck="false">    def decay_epsilon(self):
+        self.epsilon = max(self.epsilon_min,
+                           self.epsilon * self.epsilon_decay)</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>self.epsilon * self.epsilon_decay</code> 每次乘 0.999，越乘越小</li>
+            <li><code>max(...)</code> 防止 epsilon 低于 0.05，保留少量探索</li>
           </ul>
-          <h3>新建 train.py，写训练主循环</h3>
-          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="26" readonly spellcheck="false">from env import GridMazeEnv
-from agent import QLearningAgent
-
-env = GridMazeEnv()
-agent = QLearningAgent(env.rows, env.cols, n_actions=len(ACTIONS))
-
-for episode in range(1, 3001):
-    state = env.reset()
-    total_reward = 0.0
-    success = False
-
-    for step in range(150):
-        action = agent.choose_action(state)
-        next_state, reward, done = env.step(action)
-        agent.update(state, action, reward, next_state, done)
-        state = next_state
-        total_reward += reward
-        if done:
-            success = state == env.goal_pos
-            break
-
-    agent.decay_epsilon()
-    if episode % 500 == 0:
-        print("episode", episode, "完成")</textarea></div>
-          <p>一局（episode）就是“从起点出发，直到终点或步数超限”。训练就是重复很多局。</p>
+          <p>前期多探索，后期多利用，这是训练能稳定收敛的关键之一。</p>
         </div>
         <div class="step-nav">
           <button type="button" class="prev-btn">上一步</button>
@@ -325,22 +466,64 @@ for episode in range(1, 3001):
         </div>
       </section>
 
-      <section class="step" id="step-8" data-title="运行训练与观察曲线">
+      <section class="step" id="step-15" data-title="train.py：训练循环">
         <div class="step-head">
-          <span class="step-num">08</span>
-          <div><p class="kicker">STEP 08</p><h2>运行训练与观察曲线</h2></div>
+          <span class="step-num">15</span>
+          <div><p class="kicker">STEP 15</p><h2>train.py：训练循环</h2></div>
+          <span class="step-type">函数</span>
+        </div>
+        <div class="step-body">
+          <h3>这个函数做什么</h3>
+          <p>把“选动作 → 环境反馈 → 更新 Q 表”串起来，反复训练很多局。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="22" readonly spellcheck="false">def train_agent(env, agent, n_episodes, max_steps=150):
+    for episode in range(1, n_episodes + 1):
+        state = env.reset()
+        total_reward = 0.0
+        success = False
+        for step in range(max_steps):
+            action = agent.choose_action(state)
+            next_state, reward, done = env.step(action)
+            agent.update(state, action, reward, next_state, done)
+            state = next_state
+            total_reward += reward
+            if done:
+                success = state == env.goal_pos
+                break
+        agent.decay_epsilon()
+        if episode % 500 == 0:
+            print("episode", episode, "完成")</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>state = env.reset()</code> 新的一局从起点开始</li>
+            <li><code>action = agent.choose_action(state)</code> 智能体选动作</li>
+            <li><code>env.step(action)</code> 环境执行并返回新状态、奖励、是否结束</li>
+            <li><code>agent.update(...)</code> 把这次经验写进 Q 表</li>
+            <li><code>if done:</code> 本局结束，记录是否成功并退出本局</li>
+            <li><code>agent.decay_epsilon()</code> 每局结束降低探索概率</li>
+          </ul>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
+
+      <section class="step" id="step-16" data-title="运行训练看曲线">
+        <div class="step-head">
+          <span class="step-num">16</span>
+          <div><p class="kicker">STEP 16</p><h2>运行训练，观察学习曲线</h2></div>
           <span class="step-type">运行</span>
         </div>
         <div class="step-body">
           <h3>学习目标</h3>
           <ul>
-            <li>跑通测试和训练</li>
+            <li>跑通 3000 局训练</li>
             <li>学会看“成功率上升、平均步数下降”</li>
           </ul>
           <h3>运行命令</h3>
           <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block terminal" rows="2" readonly spellcheck="false">python tests.py
 python train.py</textarea></div>
-          <h3>预期输出（本项目的真实结果）</h3>
+          <h3>预期输出（本项目真实结果）</h3>
           <pre class="expected"><code>episode  500 | 最近100局成功率 100% | 平均步数 27.4 | epsilon 0.606
 episode 1000 | 最近100局成功率 100% | 平均步数 15.6 | epsilon 0.368
 最后 100 局成功率：100.0%</code></pre>
@@ -352,24 +535,16 @@ episode 1000 | 最近100局成功率 100% | 平均步数 15.6 | epsilon 0.368
         </div>
       </section>
 
-      <section class="step" id="step-9" data-title="evaluate.py：证明学会了">
+      <section class="step" id="step-17" data-title="evaluate.py：run_policy">
         <div class="step-head">
-          <span class="step-num">09</span>
-          <div><p class="kicker">STEP 09</p><h2>evaluate.py：证明学会了</h2></div>
-          <span class="step-type">代码</span>
+          <span class="step-num">17</span>
+          <div><p class="kicker">STEP 17</p><h2>evaluate.py：run_policy 跑一局</h2></div>
+          <span class="step-type">函数</span>
         </div>
         <div class="step-body">
-          <h3>学习目标</h3>
-          <ul>
-            <li>理解“训练”和“评估”要分开</li>
-            <li>用成功率对比随机策略，作为学习证据</li>
-          </ul>
-          <h3>新建 evaluate.py，写贪心评估</h3>
-          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="18" readonly spellcheck="false">import numpy as np
-from env import GridMazeEnv
-from agent import QLearningAgent
-
-def run_policy(agent, greedy):
+          <h3>这个函数做什么</h3>
+          <p>按给定策略跑一局，返回（是否成功, 走的步数）。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="11" readonly spellcheck="false">def run_policy(agent, greedy):
     env = GridMazeEnv()
     state = env.reset()
     for step in range(150):
@@ -377,16 +552,14 @@ def run_policy(agent, greedy):
         state, _, done = env.step(action)
         if done:
             break
-    return state == env.goal_pos, step + 1
-
-env = GridMazeEnv()
-agent = QLearningAgent(env.rows, env.cols)
-agent.q_table = np.load("results/q_table.npy")</textarea></div>
-          <h3>运行命令</h3>
-          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block terminal" rows="1" readonly spellcheck="false">python evaluate.py</textarea></div>
-          <pre class="expected"><code>Q-learning（贪心策略）: 成功率 100.0% | 平均步数 10.0
-随机策略对照          : 成功率  50.0% | 平均步数 120.8</code></pre>
-          <p>评估时用 <code>greedy=True</code>，也就是完全关闭探索，只看它学到的策略本身。</p>
+    return state == env.goal_pos, step + 1</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>greedy=greedy</code> 评估时传 True，完全关闭探索</li>
+            <li><code>state, _, done = env.step(action)</code> 只用状态和 done，不需要奖励</li>
+            <li><code>if done: break</code> 到达终点就提前结束</li>
+            <li><code>return state == env.goal_pos, step + 1</code> 是否成功 + 用了多少步</li>
+          </ul>
         </div>
         <div class="step-nav">
           <button type="button" class="prev-btn">上一步</button>
@@ -394,22 +567,49 @@ agent.q_table = np.load("results/q_table.npy")</textarea></div>
         </div>
       </section>
 
-      <section class="step" id="step-10" data-title="visualize.py：看见策略">
+      <section class="step" id="step-18" data-title="evaluate.py：统计成功率">
         <div class="step-head">
-          <span class="step-num">10</span>
-          <div><p class="kicker">STEP 10</p><h2>visualize.py：看见策略</h2></div>
-          <span class="step-type">代码</span>
+          <span class="step-num">18</span>
+          <div><p class="kicker">STEP 18</p><h2>evaluate.py：统计成功率</h2></div>
+          <span class="step-type">函数</span>
         </div>
         <div class="step-body">
-          <h3>学习目标</h3>
-          <ul>
-            <li>把 Q 表转成每个格子上的最优动作</li>
-            <li>用 matplotlib 画出策略图和路径</li>
+          <h3>这个函数做什么</h3>
+          <p>连续跑 100 局，统计成功率和平均步数，作为“学得好不好”的客观指标。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="9" readonly spellcheck="false">successes = []
+steps_all = []
+for _ in range(100):
+    ok, steps = run_policy(agent, greedy=True)
+    successes.append(ok)
+    steps_all.append(steps)
+print("成功率", sum(successes) / len(successes) * 100)
+print("平均步数", sum(steps_all) / len(steps_all))</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>successes.append(ok)</code> 记录这一局成没成功</li>
+            <li><code>sum(successes) / len(successes)</code> 成功局数除以总局数</li>
+            <li><code>sum(steps_all) / len(steps_all)</code> 平均每局多少步</li>
           </ul>
-          <h3>新建 visualize.py，写策略网格</h3>
-          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="16" readonly spellcheck="false">import numpy as np
+          <h3>预期输出（与随机策略对比）</h3>
+          <pre class="expected"><code>Q-learning（贪心策略）: 成功率 100.0% | 平均步数 10.0
+随机策略对照          : 成功率  50.0% | 平均步数 120.8</code></pre>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
 
-def best_action_grid(q_table, env):
+      <section class="step" id="step-19" data-title="visualize.py：best_action_grid">
+        <div class="step-head">
+          <span class="step-num">19</span>
+          <div><p class="kicker">STEP 19</p><h2>visualize.py：best_action_grid 策略网格</h2></div>
+          <span class="step-type">函数</span>
+        </div>
+        <div class="step-body">
+          <h3>这个函数做什么</h3>
+          <p>把 Q 表变成一张二维网格，每个格子存一个最优动作编号，用来画箭头。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="11" readonly spellcheck="false">def best_action_grid(q_table, env):
     grid = []
     for r in range(env.rows):
         row = []
@@ -420,8 +620,47 @@ def best_action_grid(q_table, env):
                 row.append(int(np.argmax(q_table[r * env.cols + c])))
         grid.append(row)
     return grid</textarea></div>
-          <h3>运行命令</h3>
-          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block terminal" rows="1" readonly spellcheck="false">python visualize.py</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>if env.MAP[r][c] == 1:</code> 墙格子没有动作，存 None</li>
+            <li><code>np.argmax(q_table[...])</code> 取出该格子 Q 值最大的动作</li>
+            <li><code>int(...)</code> numpy 下标转成普通整数，方便画图</li>
+            <li><code>grid.append(row)</code> 一行一行拼成完整网格</li>
+          </ul>
+        </div>
+        <div class="step-nav">
+          <button type="button" class="prev-btn">上一步</button>
+          <button type="button" class="next-btn">下一步</button>
+        </div>
+      </section>
+
+      <section class="step" id="step-20" data-title="visualize.py：走一次路径">
+        <div class="step-head">
+          <span class="step-num">20</span>
+          <div><p class="kicker">STEP 20</p><h2>visualize.py：走一次路径</h2></div>
+          <span class="step-type">函数</span>
+        </div>
+        <div class="step-body">
+          <h3>这个函数做什么</h3>
+          <p>让训练好的智能体从起点走一次，返回走过的格子列表和是否成功。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="10" readonly spellcheck="false">def run_greedy_path(env, agent):
+    state = env.reset()
+    path = [state]
+    for _ in range(150):
+        action = agent.choose_action(state, greedy=True)
+        state, _, done = env.step(action)
+        path.append(state)
+        if done:
+            return path, state == env.goal_pos
+    return path, False</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>path = [state]</code> 先把起点记进路径</li>
+            <li><code>path.append(state)</code> 每走一步都记录新位置</li>
+            <li><code>return path, True</code> 到终点就返回整条路径</li>
+            <li><code>return path, False</code> 150 步没到终点也算失败</li>
+          </ul>
+          <h3>预期输出</h3>
           <pre class="expected"><code>0,0 -> 1,0 -> 1,1 -> 2,1 -> 3,1 -> 3,2 -> 3,3 -> 4,3 -> 4,4 -> 4,5 -> 5,5
 是否到达终点: True</code></pre>
         </div>
@@ -431,30 +670,32 @@ def best_action_grid(q_table, env):
         </div>
       </section>
 
-      <section class="step" id="step-11" data-title="experiments.py：参数实验">
+      <section class="step" id="step-21" data-title="experiments.py：参数实验">
         <div class="step-head">
-          <span class="step-num">11</span>
-          <div><p class="kicker">STEP 11</p><h2>experiments.py：参数实验</h2></div>
+          <span class="step-num">21</span>
+          <div><p class="kicker">STEP 21</p><h2>experiments.py：单变量实验</h2></div>
           <span class="step-type">实验</span>
         </div>
         <div class="step-body">
-          <h3>学习目标</h3>
-          <ul>
-            <li>学会做单变量实验：一次只改一个参数</li>
-            <li>用成功率判断参数好坏</li>
-          </ul>
-          <h3>新建 experiments.py，写实验循环</h3>
-          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="14" readonly spellcheck="false">for alpha in [0.05, 0.1, 0.3]:
+          <h3>这个循环做什么</h3>
+          <p>一次只改一个超参数（这里是 alpha），其余不变，比较最终成功率。</p>
+          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block" rows="8" readonly spellcheck="false">for alpha in [0.05, 0.1, 0.3]:
     agent = QLearningAgent(env.rows, env.cols, alpha=alpha)
-    # 训练 n 局（和 train.py 里一样的循环）
-    success_rate, avg_steps = evaluate(agent, greedy=True)
-    print(f"alpha={alpha} 成功率={success_rate:.1%} 平均步数={avg_steps:.1f}")</textarea></div>
-          <h3>运行命令</h3>
-          <div class="code-wrap"><button type="button" class="copy-btn">复制</button><textarea class="code-block terminal" rows="1" readonly spellcheck="false">python experiments.py</textarea></div>
+    train_agent(env, agent, 1500)
+    success_rate, avg_steps = evaluate(agent)
+    print(alpha, success_rate, avg_steps)</textarea></div>
+          <h3>逐行讲解</h3>
+          <ul class="line-expl">
+            <li><code>for alpha in [0.05, 0.1, 0.3]:</code> 依次尝试三个学习率</li>
+            <li><code>QLearningAgent(..., alpha=alpha)</code> 每次只换 alpha</li>
+            <li><code>train_agent(env, agent, 1500)</code> 每组训练相同局数</li>
+            <li><code>evaluate(agent)</code> 用同一套评估函数比较结果</li>
+          </ul>
+          <h3>预期输出</h3>
           <pre class="expected"><code>alpha = 0.05 | 最终成功率 100.0% | 平均步数 10.0
 alpha = 0.1  | 最终成功率 100.0% | 平均步数 10.0
 alpha = 0.3  | 最终成功率 100.0% | 平均步数 10.0</code></pre>
-          <p>小地图上几种 alpha 都能收敛；换更大的地图，差异会明显起来。</p>
+          <p>小地图上几种 alpha 都能收敛；换成更大的地图，差异会更明显。</p>
         </div>
         <div class="step-nav">
           <button type="button" class="prev-btn">上一步</button>
@@ -462,10 +703,10 @@ alpha = 0.3  | 最终成功率 100.0% | 平均步数 10.0</code></pre>
         </div>
       </section>
 
-      <section class="step" id="step-12" data-title="总结与下一步">
+      <section class="step" id="step-22" data-title="总结与下一步">
         <div class="step-head">
-          <span class="step-num">12</span>
-          <div><p class="kicker">STEP 12</p><h2>总结与下一步</h2></div>
+          <span class="step-num">22</span>
+          <div><p class="kicker">STEP 22</p><h2>总结与下一步</h2></div>
           <span class="step-type">收尾</span>
         </div>
         <div class="step-body">

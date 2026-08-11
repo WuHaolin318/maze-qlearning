@@ -228,6 +228,30 @@ body {
   margin: 5px 0;
 }
 
+.line-expl {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.line-expl li {
+  position: relative;
+  margin: 8px 0;
+  padding-left: 18px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.line-expl li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 8px;
+  height: 1px;
+  background: var(--teal);
+}
+
 .step-body code,
 .expected code {
   font-family: var(--mono);
