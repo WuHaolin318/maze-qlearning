@@ -3,58 +3,162 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Q-learning 迷宫学习台</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Q-learning 迷宫自主导航系统</title>
+  <meta name="description" content="一个从零实现的 Q-learning 迷宫自主导航项目：状态、动作、奖励、Q 表、epsilon-greedy、可视化与参数实验。">
+  <link rel="stylesheet" href="intro.css">
 </head>
 <body>
-  <header class="topbar">
-    <h1>Q-learning 迷宫学习台</h1>
-    <div class="stats">
-      <span>局数 <b id="statEpisode">0</b></span>
-      <span>探索率 ε <b id="statEpsilon">1.000</b></span>
-      <span>近100局成功率 <b id="statSuccess">-</b></span>
-      <span>平均步数 <b id="statSteps">-</b></span>
-    </div>
+  <canvas id="grid-bg" aria-hidden="true"></canvas>
+
+  <header class="site-head">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">◈</span>
+      <span>maze-qlearning</span>
+    </a>
+    <nav aria-label="页面导航">
+      <a href="#about">项目</a>
+      <a href="#principle">原理</a>
+      <a href="#results">成果</a>
+      <a href="#stack">技术栈</a>
+    </nav>
   </header>
 
-  <main class="layout">
-    <section class="stage" aria-label="迷宫训练区">
-      <canvas id="maze" width="480" height="480" aria-label="迷宫与智能体位置">迷宫与智能体位置</canvas>
-      <div class="controls">
-        <button type="button" id="playBtn" class="btn btn-primary" aria-label="播放或暂停训练">
-          <span aria-hidden="true" id="playIcon">▶</span><span id="playLabel">播放</span>
-        </button>
-        <button type="button" id="stepBtn" class="btn" aria-label="单步执行一次动作">
-          <span aria-hidden="true">↷</span>单步
-        </button>
-        <button type="button" id="resetBtn" class="btn" aria-label="重置训练">
-          <span aria-hidden="true">↺</span>重置
-        </button>
-        <label class="param">速度 <input type="range" id="speed" min="1" max="24" value="8"><span id="speedVal">8</span></label>
-        <label class="check"><input type="checkbox" id="showPolicy" checked>策略箭头</label>
-        <label class="check"><input type="checkbox" id="showQ">Q 值热度</label>
-      </div>
-
-      <h2 class="section-title">参数</h2>
-      <div class="controls params">
-        <label class="param">学习率 α <input type="range" id="alpha" min="0.01" max="1" step="0.01" value="0.1"><span id="alphaVal">0.10</span></label>
-        <label class="param">折扣 γ <input type="range" id="gamma" min="0" max="0.99" step="0.01" value="0.9"><span id="gammaVal">0.90</span></label>
-        <label class="param">初始探索率 <input type="range" id="epsilonStart" min="0.05" max="1" step="0.05" value="1"><span id="epsilonStartVal">1.00</span></label>
-        <label class="param">每局衰减 <input type="range" id="epsilonDecay" min="0.9" max="1" step="0.001" value="0.999"><span id="epsilonDecayVal">0.999</span></label>
+  <main>
+    <section class="hero" id="top">
+      <div class="hero-inner">
+        <p class="eyebrow">强化学习 · 从零实现 · 可交互</p>
+        <h1>Q-learning<br>迷宫自主导航系统</h1>
+        <p class="lead">一个 6×6 网格迷宫里的智能体，用 Q 表、epsilon-greedy 和 TD 更新公式，从完全乱走学会 10 步最优路径。</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="demo.html">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            进入学习台
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/WuHaolin318/maze-qlearning">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.17c-3.2.7-3.87-1.36-3.87-1.36-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.41-2.69 5.38-5.25 5.66.41.35.77 1.05.77 2.12v3.14c0 .31.21.68.8.56A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+            查看源码
+          </a>
+        </div>
+        <div class="hero-stats" aria-label="项目关键数据">
+          <div><b data-count="36">0</b><span>状态</span></div>
+          <div><b data-count="3000">0</b><span>训练局数</span></div>
+          <div><b data-count="100" data-suffix="%">0</b><span>成功率</span></div>
+          <div><b data-count="10">0</b><span>最优步数</span></div>
+        </div>
       </div>
     </section>
 
-    <aside class="side" aria-label="学习曲线与更新信息">
-      <h2 class="section-title">训练曲线</h2>
-      <canvas id="curves" width="480" height="240" aria-label="奖励与成功率训练曲线">奖励与成功率训练曲线</canvas>
-      <h2 class="section-title">最近一次 Q 更新</h2>
-      <div class="formula-box">
-        <div id="lastLine">状态 -- · 动作 -- · 奖励 -- · 结束 --</div>
-        <div id="formulaLine">Q(s,a) ← --</div>
+    <section class="band" id="about">
+      <div class="container">
+        <p class="kicker">ABOUT</p>
+        <h2>为什么做这个项目</h2>
+        <p class="section-lead">不依赖任何深度学习框架，环境、算法、训练、评估全部手写，把强化学习的每个概念拆开看明白。</p>
+        <div class="feature-grid">
+          <article class="feature reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></svg>
+            </div>
+            <h3>从零实现</h3>
+            <p>环境与 Q-learning 算法均为手写，代码带详细中文注释。</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="8" cy="7" r="2" fill="var(--bg)"/><circle cx="15" cy="12" r="2" fill="var(--bg)"/><circle cx="10" cy="17" r="2" fill="var(--bg)"/></svg>
+            </div>
+            <h3>可交互学习台</h3>
+            <p>浏览器里实时调参、单步观察每次 Q 更新的数值变化。</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20v-6M9 20V9M14 20v-9M19 20V4"/></svg>
+            </div>
+            <h3>实验可复现</h3>
+            <p>固定随机种子，自动化测试覆盖环境规则与更新公式。</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M12 6a6 6 0 0 0 0 12 6 6 0 0 0 0-12z"/></svg>
+            </div>
+            <h3>结果可视化</h3>
+            <p>策略箭头、行走路径、训练曲线，学习过程一目了然。</p>
+          </article>
+        </div>
       </div>
-    </aside>
+    </section>
+
+    <section class="band band-alt" id="principle">
+      <div class="container">
+        <p class="kicker">PRINCIPLE</p>
+        <h2>核心原理</h2>
+        <div class="principle-grid">
+          <div class="principle reveal">
+            <h3>状态 · 动作 · 奖励</h3>
+            <p>state 是格子坐标 (row, col)，action 是上下左右四向；到达终点 +10，撞墙 -1，普通移动 -0.1。</p>
+          </div>
+          <div class="principle reveal">
+            <h3>探索与利用</h3>
+            <p>epsilon 从 1.0 衰减到 0.05：前期随机探索发现终点，后期选择 Q 值最大的动作稳定收敛。</p>
+          </div>
+        </div>
+        <div class="formula reveal" aria-label="Q 值更新公式">
+          <code>Q(s,a) ← Q(s,a) + α × ( r + γ × max Q(s′,a′) − Q(s,a) )</code>
+          <p>目标值比旧估计更接近真实回报，α 控制每次修正幅度，γ 给未来奖励打折。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="results">
+      <div class="container">
+        <p class="kicker">RESULTS</p>
+        <h2>训练成果</h2>
+        <div class="gallery">
+          <figure class="reveal">
+            <img src="results/training_curves.png" alt="训练奖励与成功率曲线">
+            <figcaption>训练曲线</figcaption>
+          </figure>
+          <figure class="reveal">
+            <img src="results/policy.png" alt="最终策略箭头图">
+            <figcaption>最终策略</figcaption>
+          </figure>
+          <figure class="reveal">
+            <img src="results/path.png" alt="智能体行走路径">
+            <figcaption>最优路径</figcaption>
+          </figure>
+        </div>
+        <p class="gallery-note">贪心评估 100 局：成功率 100%，平均 10 步；随机策略对照仅为 50%、平均 120.8 步。</p>
+      </div>
+    </section>
+
+    <section class="band band-alt" id="stack">
+      <div class="container">
+        <p class="kicker">STACK</p>
+        <h2>技术栈</h2>
+        <div class="chips">
+          <span>Python 3.12</span>
+          <span>numpy</span>
+          <span>matplotlib</span>
+          <span>HTML5</span>
+          <span>CSS3</span>
+          <span>JavaScript</span>
+          <span>Git</span>
+          <span>GitHub Pages</span>
+        </div>
+        <div class="file-list" aria-label="项目文件结构">
+          <code>env.py</code><code>agent.py</code><code>train.py</code><code>evaluate.py</code>
+          <code>visualize.py</code><code>experiments.py</code><code>tests.py</code><code>demo.html</code>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <script src="app.js"></script>
+  <footer class="site-foot">
+    <div class="container">
+      <a href="https://WuHaolin318.github.io/maze-qlearning/">WuHaolin318.github.io/maze-qlearning</a>
+      <a href="demo.html">进入学习台</a>
+      <a href="https://github.com/WuHaolin318/maze-qlearning">GitHub</a>
+    </div>
+  </footer>
+
+  <script src="intro.js"></script>
 </body>
 </html>
